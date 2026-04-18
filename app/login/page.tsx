@@ -6,21 +6,60 @@ import { Header } from "@/components/header"
 import { ContentCard } from "@/components/content-card"
 import { Button } from "@/components/ui/button"
 import { useApp } from "@/lib/context"
-import { mockUsers } from "@/lib/mock-data"
+import { auth, db } from "@/lib/firebase"
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
+import { doc, setDoc } from "firebase/firestore"
 
 export default function LoginPage() {
   const router = useRouter()
   const { setCurrentUser } = useApp()
-  const [selectedUser, setSelectedUser] = useState(mockUsers[0].id)
-  const [role, setRole] = useState<"need-help" | "can-help" | "both">("both")
-  const [email, setEmail] = useState("community@helphub.ai")
-  const [password, setPassword] = useState("********")
+  const [isLogin, setIsLogin] = useState(true)
 
-  const handleLogin = () => {
-    const user = mockUsers.find((u) => u.id === selectedUser)
-    if (user) {
-      setCurrentUser({ ...user, role })
-      router.push("/dashboard")
+  // Form states
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [role, setRole] = useState<"need-help" | "can-help" | "both">("both")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleAuth = async () => {
+    setError("")
+    setLoading(true)
+
+    try {
+      if (isLogin) {
+        // Login flow
+        await signInWithEmailAndPassword(auth, email, password)
+        router.push("/dashboard")
+      } else {
+        // Sign-up flow
+        if (!name) {
+          throw new Error("Name is required for sign up")
+        }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+        const user = userCredential.user
+
+        // Create user document in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          id: user.uid,
+          name,
+          email,
+          role,
+          location: "Unknown", // Default or you could add a field for it
+          skills: [],
+          interests: [],
+          trustScore: 0,
+          contributions: 0,
+          badges: []
+        })
+
+        router.push("/dashboard")
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to authenticate")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -39,7 +78,7 @@ export default function LoginPage() {
               Enter the support network.
             </h1>
             <p className="text-gray-400 text-sm mb-8 max-w-md leading-relaxed">
-              Choose a demo identity, set your role, and jump into a multi-page product flow designed for asking, offering, and tracking help with a premium interface.
+              Create an account or login to access the community features. Powered by Firebase Authentication and Firestore real-time database.
             </p>
 
             <ul className="space-y-4 text-gray-300 text-sm">
@@ -53,50 +92,55 @@ export default function LoginPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-gray-500 mt-0.5">•</span>
-                <span>Persistent demo session powered by LocalStorage</span>
+                <span>Persistent sessions powered by Firebase Auth</span>
               </li>
             </ul>
           </div>
 
           {/* Right Form Card */}
-          <ContentCard label="LOGIN / SIGNUP" title="Authenticate your community profile">
+          <ContentCard label={isLogin ? "LOGIN" : "SIGNUP"} title="Authenticate your community profile">
             <div className="space-y-6">
-              {/* Demo User Select */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Select demo user
-                </label>
-                <select
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                  className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
-                >
-                  {mockUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
 
-              {/* Role Selection */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Role selection
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as typeof role)}
-                  className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
-                >
-                  <option value="both">Both</option>
-                  <option value="need-help">Need Help</option>
-                  <option value="can-help">Can Help</option>
-                </select>
-              </div>
+              {/* Sign up only fields */}
+              {!isLogin && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Jane Doe"
+                      className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Role selection
+                    </label>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value as typeof role)}
+                      className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
+                    >
+                      <option value="both">Both</option>
+                      <option value="need-help">Need Help</option>
+                      <option value="can-help">Can Help</option>
+                    </select>
+                  </div>
+                </>
+              )}
 
               {/* Email and Password Row */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Email
@@ -105,6 +149,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
                     className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
                   />
                 </div>
@@ -116,6 +161,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder="********"
                     className="w-full px-4 py-3 bg-muted rounded-xl border-0 text-foreground focus:ring-2 focus:ring-primary outline-none"
                   />
                 </div>
@@ -123,11 +169,23 @@ export default function LoginPage() {
 
               {/* Submit Button */}
               <Button
-                onClick={handleLogin}
+                onClick={handleAuth}
+                disabled={loading}
                 className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-6 text-base font-medium"
               >
-                Continue to dashboard
+                {loading ? "Processing..." : (isLogin ? "Log In to dashboard" : "Sign up & Continue")}
               </Button>
+              
+              {/* Toggle Mode */}
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
+                </button>
+              </div>
             </div>
           </ContentCard>
         </div>

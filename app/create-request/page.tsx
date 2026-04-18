@@ -7,6 +7,8 @@ import { HeroSection } from "@/components/hero-section"
 import { ContentCard } from "@/components/content-card"
 import { Button } from "@/components/ui/button"
 import { useApp } from "@/lib/context"
+import { db } from "@/lib/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export default function CreateRequestPage() {
   const router = useRouter()
@@ -37,26 +39,28 @@ export default function CreateRequestPage() {
     }
   }
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!currentUser || !title) return
 
-    const newRequest = {
-      id: String(requests.length + 1),
-      title,
-      description,
-      category,
-      urgency,
-      status: "open" as const,
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-      authorId: currentUser.id,
-      authorName: currentUser.name,
-      authorLocation: currentUser.location,
-      helpersInterested: 0,
-      createdAt: new Date(),
+    try {
+      await addDoc(collection(db, "requests"), {
+        title,
+        description,
+        category,
+        urgency,
+        status: "open",
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        authorLocation: currentUser.location || "Unknown",
+        helpersInterested: 0,
+        createdAt: serverTimestamp(),
+      })
+      router.push("/dashboard")
+    } catch (error) {
+      console.error("Error adding document: ", error)
+      alert("Failed to publish request.")
     }
-
-    setRequests([newRequest, ...requests])
-    router.push("/dashboard")
   }
 
   return (
