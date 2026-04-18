@@ -1,9 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Chatbot } from "./chatbot"
+import { useApp } from "@/lib/context"
+import { auth } from "@/lib/firebase"
+import { signOut } from "firebase/auth"
 
 interface HeaderProps {
   variant?: "default" | "auth" | "dashboard"
@@ -11,6 +14,17 @@ interface HeaderProps {
 
 export function Header({ variant = "default" }: HeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { currentUser } = useApp()
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth)
+      router.push("/")
+    } catch (error) {
+      console.error("Failed to log out", error)
+    }
+  }
 
   const navLinks = {
     default: [
@@ -69,26 +83,43 @@ export function Header({ variant = "default" }: HeaderProps) {
             >
               Live community signals
             </Link>
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
-            >
-              Join the platform
-            </Link>
+            {currentUser ? (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+              >
+                Join the platform
+              </Link>
+            )}
           </>
         )}
         {variant === "dashboard" && (
-          <Link
-            href="/create-request"
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-              pathname === "/create-request"
-                ? "bg-primary/10 text-primary border border-primary/20"
-                : "border border-border hover:border-primary/20"
-            )}
-          >
-            Create Request
-          </Link>
+          <>
+            <Link
+              href="/create-request"
+              className={cn(
+                "px-4 py-2 text-sm font-medium rounded-full transition-colors",
+                pathname === "/create-request"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "border border-border hover:border-primary/20"
+              )}
+            >
+              Create Request
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm font-medium border border-border text-foreground rounded-full hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors"
+            >
+              Logout
+            </button>
+          </>
         )}
         <Chatbot />
       </nav>
