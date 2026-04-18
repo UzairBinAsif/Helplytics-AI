@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { Chatbot } from "./chatbot"
 
 interface HeaderProps {
   variant?: "default" | "auth" | "dashboard"
@@ -89,6 +90,7 @@ export function Header({ variant = "default" }: HeaderProps) {
             Create Request
           </Link>
         )}
+        <Chatbot />
       </nav>
     </header>
   )
