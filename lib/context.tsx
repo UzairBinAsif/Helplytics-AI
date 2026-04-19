@@ -9,6 +9,7 @@ import { collection, onSnapshot, doc, getDoc } from "firebase/firestore"
 interface AppContextType {
   currentUser: User | null
   setCurrentUser: (user: User | null) => void
+  authLoading: boolean
   users: User[]
   requests: HelpRequest[]
   setRequests: (requests: HelpRequest[]) => void
@@ -22,6 +23,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
   const [requests, setRequests] = useState<HelpRequest[]>([])
   const [messages, setMessages] = useState<Message[]>([])
@@ -30,16 +32,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Listen to Firebase Auth state
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // fetch user doc from firestore
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid))
-        if (userDoc.exists()) {
-          setCurrentUser({ id: firebaseUser.uid, ...userDoc.data() } as User)
+      try {
+        if (firebaseUser) {
+          // fetch user doc from firestore
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid))
+          if (userDoc.exists()) {
+            setCurrentUser({ id: firebaseUser.uid, ...userDoc.data() } as User)
+          } else {
+            setCurrentUser(null)
+          }
         } else {
           setCurrentUser(null)
         }
-      } else {
-        setCurrentUser(null)
+      } finally {
+        setAuthLoading(false)
       }
     })
 
@@ -100,6 +106,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         currentUser,
         setCurrentUser,
+        authLoading,
         users,
         requests,
         setRequests,

@@ -12,15 +12,15 @@ import Link from "next/link"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { currentUser, requests, notifications } = useApp()
+  const { currentUser, authLoading, requests, notifications } = useApp()
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!authLoading && !currentUser) {
       router.push("/login")
     }
-  }, [currentUser, router])
+  }, [currentUser, authLoading, router])
 
-  if (!currentUser) {
+  if (authLoading || !currentUser) {
     return null
   }
 
@@ -78,7 +78,7 @@ export default function DashboardPage() {
           <ContentCard label="QUICK ACTIONS" title="What do you need?">
             <div className="space-y-4">
               <Link href="/create-request" className="block">
-                <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-6">
+                <Button className="w-full bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full py-6">
                   Create a new request
                 </Button>
               </Link>

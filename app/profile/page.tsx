@@ -10,7 +10,7 @@ import { useApp } from "@/lib/context"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { currentUser, setCurrentUser } = useApp()
+  const { currentUser, authLoading, setCurrentUser } = useApp()
 
   const [name, setName] = useState("")
   const [location, setLocation] = useState("")
@@ -18,17 +18,17 @@ export default function ProfilePage() {
   const [interests, setInterests] = useState("")
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!authLoading && !currentUser) {
       router.push("/login")
-    } else {
+    } else if (currentUser) {
       setName(currentUser.name)
       setLocation(currentUser.location)
       setSkills(currentUser.skills.join(", "))
       setInterests(currentUser.interests.join(", "))
     }
-  }, [currentUser, router])
+  }, [currentUser, authLoading, router])
 
-  if (!currentUser) {
+  if (authLoading || !currentUser) {
     return null
   }
 
@@ -159,7 +159,7 @@ export default function ProfilePage() {
               {/* Save Button */}
               <Button
                 onClick={handleSave}
-                className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-6 text-base font-medium"
+                className="w-full bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full py-6 text-base font-medium transition-all shadow-sm"
               >
                 Save profile
               </Button>

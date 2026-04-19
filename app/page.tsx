@@ -35,7 +35,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap gap-4 mb-14">
               <Link href="/login">
-                <Button className="bg-[#10B981] hover:bg-[#059669] text-white rounded-full px-8 py-6 text-base font-medium shadow-sm transition-all focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2">
+                <Button className="bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full px-8 py-6 text-base font-medium shadow-sm transition-all focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2">
                   Open product demo
                 </Button>
               </Link>
@@ -68,7 +68,7 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="bg-[#132A21] rounded-[2rem] p-8 md:p-12 relative shadow-2xl flex flex-col overflow-hidden">
-            <div className="absolute -top-6 -right-6 w-32 h-32 bg-[#EAB308] rounded-full shadow-[0_0_60px_rgba(234,179,8,0.4)]" />
+            <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-[#fde047] via-[#eab308] to-[#a16207] shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.3)]" />
             
             <p className="text-[10px] font-bold tracking-[0.2em] text-gray-300 uppercase mb-4 relative z-10">
               LIVE PRODUCT FEEL
@@ -76,7 +76,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-6 relative z-10">
               More than a form.<br />
               More like an<br />
-              ecosystem.
+              ecosystem<span className="text-[#f5df4d]">.</span>
             </h2>
             <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-10 relative z-10">
               A polished multi-page experience inspired by product platforms, with AI summaries, trust scores, contribution signals, notifications, and leaderboard momentum built directly in HTML, CSS, JavaScript, and LocalStorage.

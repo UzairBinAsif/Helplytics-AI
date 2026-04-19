@@ -11,18 +11,18 @@ import { mockUsers } from "@/lib/mock-data"
 
 export default function MessagesPage() {
   const router = useRouter()
-  const { currentUser, messages, setMessages } = useApp()
+  const { currentUser, authLoading, messages, setMessages } = useApp()
 
   const [recipient, setRecipient] = useState(mockUsers[0].id)
   const [messageContent, setMessageContent] = useState("")
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!authLoading && !currentUser) {
       router.push("/login")
     }
-  }, [currentUser, router])
+  }, [currentUser, authLoading, router])
 
-  if (!currentUser) {
+  if (authLoading || !currentUser) {
     return null
   }
 
@@ -141,7 +141,7 @@ export default function MessagesPage() {
               {/* Send Button */}
               <Button
                 onClick={handleSend}
-                className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-6 text-base font-medium"
+                className="w-full bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full py-6 text-base font-medium transition-all shadow-sm"
               >
                 Send
               </Button>

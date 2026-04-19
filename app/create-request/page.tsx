@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
@@ -12,7 +12,13 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export default function CreateRequestPage() {
   const router = useRouter()
-  const { currentUser, requests, setRequests } = useApp()
+  const { currentUser, authLoading, requests, setRequests } = useApp()
+
+  useEffect(() => {
+    if (!authLoading && !currentUser) {
+      router.push("/login")
+    }
+  }, [currentUser, authLoading, router])
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -27,6 +33,10 @@ export default function CreateRequestPage() {
     tags: "Add more detail for smarter tags",
     rewrite: "Start describing the challenge to generate a stronger version.",
   })
+
+  if (authLoading || !currentUser) {
+    return null
+  }
 
   const handleApplyAI = () => {
     if (description.length > 20) {
@@ -167,7 +177,7 @@ export default function CreateRequestPage() {
                   </Button>
                   <Button
                     onClick={handlePublish}
-                    className="bg-primary hover:bg-primary/90 text-white rounded-full px-6"
+                    className="bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full px-6 transition-all shadow-sm"
                   >
                     Publish request
                   </Button>

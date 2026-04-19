@@ -70,9 +70,7 @@ export default function LeaderboardPage() {
                       className={`h-full rounded-full transition-all ${
                         entry.trustScore >= 90
                           ? "bg-amber-400"
-                          : entry.trustScore >= 75
-                          ? "bg-primary"
-                          : "bg-primary"
+                          : "bg-gradient-to-r from-[#0d9488] to-[#10B981]"
                       }`}
                       style={{ width: `${entry.trustScore}%` }}
                     />
@@ -87,7 +85,7 @@ export default function LeaderboardPage() {
         <div className="mt-8">
           <ContentCard>
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-[#0d9488] to-[#10B981] flex items-center justify-center text-white font-bold text-xl">
                 {mockLeaderboard[0].name.split(" ").map((n) => n[0]).join("")}
               </div>
               <div className="flex-1">

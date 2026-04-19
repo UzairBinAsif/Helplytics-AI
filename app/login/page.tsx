@@ -171,7 +171,7 @@ export default function LoginPage() {
               <Button
                 onClick={handleAuth}
                 disabled={loading}
-                className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-6 text-base font-medium"
+                className="w-full bg-gradient-to-r from-[#0d9488] to-[#10B981] hover:from-[#0f766e] hover:to-[#059669] text-white rounded-full py-6 text-base font-medium transition-all shadow-sm"
               >
                 {loading ? "Processing..." : (isLogin ? "Log In to dashboard" : "Sign up & Continue")}
               </Button>

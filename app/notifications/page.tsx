@@ -10,15 +10,15 @@ import { useApp } from "@/lib/context"
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const { currentUser, notifications, setNotifications } = useApp()
+  const { currentUser, authLoading, notifications, setNotifications } = useApp()
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!authLoading && !currentUser) {
       router.push("/login")
     }
-  }, [currentUser, router])
+  }, [currentUser, authLoading, router])
 
-  if (!currentUser) {
+  if (authLoading || !currentUser) {
     return null
   }
 
